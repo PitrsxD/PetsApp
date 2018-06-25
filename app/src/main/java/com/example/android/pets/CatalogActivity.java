@@ -67,9 +67,26 @@ public class CatalogActivity extends AppCompatActivity {
         // Create and/or open a database to read from it
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        // Perform this raw SQL query "SELECT * FROM pets"
-        // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT " + "*" + " FROM " + FeedEntry.TABLE_NAME, null);
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+                FeedEntry._ID
+                FeedEntry.COLUMN_PET_NAME,
+                FeedEntry.COLUMN_PET_BREED,
+                FeedEntry.COLUMN_PET_GENDER,
+                FeedEntry.COLUMN_PET_WEIGHT
+                };
+
+        Cursor cursor = db.query(
+                FeedEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).

@@ -157,17 +157,18 @@ public class EditorActivity extends AppCompatActivity {
         int petWeight = Integer.parseInt(mWeightEditText.getText().toString().trim());
 
 
-        try {
             mDbHelper = new PetsDatabaseHelper(this, PetsDatabaseHelper.DB_NAME, null, PetsDatabaseHelper.DB_VERSION);
             SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
             ContentValues values = new ContentValues();
             values.put(FeedEntry.COLUMN_PET_NAME, petName);
             values.put(FeedEntry.COLUMN_PET_BREED, petBreed);
             values.put(FeedEntry.COLUMN_PET_GENDER, petGender);
             values.put(FeedEntry.COLUMN_PET_WEIGHT, petWeight);
             long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
+        if (newRowId != -1) {
             Toast.makeText(this, "Data saved under ID: " + newRowId, Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
+        } else {
             Toast.makeText(this, "Ups! ERROR, we didn't manage to save data", Toast.LENGTH_SHORT).show();
         }
     }

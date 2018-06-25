@@ -24,10 +24,10 @@ public class PetsDatabaseHelper extends SQLiteOpenHelper {
             FeedEntry.COLUMN_PET_NAME + TEXT + NOT_NULL + COMMA +
             FeedEntry.COLUMN_PET_BREED + TEXT + COMMA +
             FeedEntry.COLUMN_PET_GENDER + INTEGER + NOT_NULL + COMMA +
-            FeedEntry.COLUMN_PET_WEIGHT + INTEGER + DEFAULT + " 0"+
+            FeedEntry.COLUMN_PET_WEIGHT + INTEGER + DEFAULT + " 0" +
             ")";
 
-    private  static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
+    private static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " + FeedEntry.TABLE_NAME;
 
     public PetsDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, DB_NAME, null, DB_VERSION);
