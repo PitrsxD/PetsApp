@@ -27,7 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.android.pets.data.PetsContract;
 import com.example.android.pets.data.PetsContract.FeedEntry;
 import com.example.android.pets.data.PetsDatabaseHelper;
 
@@ -57,7 +56,7 @@ public class CatalogActivity extends AppCompatActivity {
         // and pass the context, which is the current activity.
         mDbHelper = new PetsDatabaseHelper(this, PetsDatabaseHelper.DB_NAME, null, PetsDatabaseHelper.DB_VERSION);
 
-        //displayDatabaseInfo();
+        displayDatabaseInfo();
     }
 
     /**
@@ -70,12 +69,12 @@ public class CatalogActivity extends AppCompatActivity {
 
         // Perform this raw SQL query "SELECT * FROM pets"
         // to get a Cursor that contains all rows from the pets table.
-        Cursor cursor = db.rawQuery("SELECT " + FeedEntry.COLUMN_PET_NAME + " FROM " + FeedEntry.TABLE_NAME, null);
+        Cursor cursor = db.rawQuery("SELECT " + "*" + " FROM " + FeedEntry.TABLE_NAME, null);
         try {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            displayView.setText(cursor.getCount());
+            TextView displayView = findViewById(R.id.text_view_pet);
+            displayView.setText("Number of rows in pets database table:" + cursor.getCount());
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
@@ -98,7 +97,8 @@ public class CatalogActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
-                // insertDummyData();
+                insertDummyData();
+                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -123,7 +123,5 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(FeedEntry.COLUMN_PET_WEIGHT, weightDummy);
 
         long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
-
-        displayDatabaseInfo();
     }
 }
