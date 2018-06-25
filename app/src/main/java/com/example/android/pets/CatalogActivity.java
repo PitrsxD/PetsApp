@@ -70,7 +70,7 @@ public class CatalogActivity extends AppCompatActivity {
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
         String[] projection = {
-                FeedEntry._ID
+                FeedEntry._ID,
                 FeedEntry.COLUMN_PET_NAME,
                 FeedEntry.COLUMN_PET_BREED,
                 FeedEntry.COLUMN_PET_GENDER,
@@ -91,7 +91,19 @@ public class CatalogActivity extends AppCompatActivity {
             // Display the number of rows in the Cursor (which reflects the number of rows in the
             // pets table in the database).
             TextView displayView = findViewById(R.id.text_view_pet);
-            displayView.setText("Number of rows in pets database table:" + cursor.getCount());
+            displayView.setText("The pets table contains " + cursor.getCount() + " pets.\n\n");
+            displayView.append(FeedEntry._ID + " - " + FeedEntry.COLUMN_PET_NAME + "\n");
+
+            int idColumnIndex = cursor.getColumnIndex(FeedEntry._ID);
+            int nameColumnIndex = cursor.getColumnIndex(FeedEntry.COLUMN_PET_NAME);
+
+            while (cursor.moveToNext()) {
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentName = cursor.getString(nameColumnIndex);
+
+                displayView.append(("\n" + currentID + " - " + currentName));
+            }
+
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
