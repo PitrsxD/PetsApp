@@ -25,8 +25,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ListView;
 
+import com.example.android.pets.data.PetCursorAdapter;
 import com.example.android.pets.data.PetsContract.FeedEntry;
 import com.example.android.pets.data.PetsDatabaseHelper;
 
@@ -64,8 +65,6 @@ public class CatalogActivity extends AppCompatActivity {
      * the pets database.
      */
     private void displayDatabaseInfo() {
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
@@ -75,40 +74,19 @@ public class CatalogActivity extends AppCompatActivity {
                 FeedEntry.COLUMN_PET_BREED,
                 FeedEntry.COLUMN_PET_GENDER,
                 FeedEntry.COLUMN_PET_WEIGHT
-                };
+        };
 
-        Cursor cursor = db.query(
-                FeedEntry.TABLE_NAME,
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
+        //Content Resolver is going into PetProvider class, where will gather data through Query method
+        Cursor cursor = getContentResolver().query(FeedEntry.CONTENT_URI, projection, null, null, null);
 
-        try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // pets table in the database).
-            TextView displayView = findViewById(R.id.text_view_pet);
-            displayView.setText("The pets table contains " + cursor.getCount() + " pets.\n\n");
-            displayView.append(FeedEntry._ID + " - " + FeedEntry.COLUMN_PET_NAME + "\n");
+        // Display the number of rows in the Cursor (which reflects the number of rows in the
+        // pets table in the database).
+        ListView displayView = findViewById(R.id.list_view_pet);
 
-            int idColumnIndex = cursor.getColumnIndex(FeedEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(FeedEntry.COLUMN_PET_NAME);
+        PetCursorAdapter petAdapter = new PetCursorAdapter(this, cursor);
 
-            while (cursor.moveToNext()) {
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
+        displayView.setAdapter(petAdapter);
 
-                displayView.append(("\n" + currentID + " - " + currentName));
-            }
-
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
     }
 
 
@@ -151,6 +129,6 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(FeedEntry.COLUMN_PET_GENDER, genderDummy);
         values.put(FeedEntry.COLUMN_PET_WEIGHT, weightDummy);
 
-        long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
+        getContentResolver().insert(FeedEntry.CONTENT_URI, values);
     }
 }

@@ -165,12 +165,8 @@ public class EditorActivity extends AppCompatActivity {
             values.put(FeedEntry.COLUMN_PET_BREED, petBreed);
             values.put(FeedEntry.COLUMN_PET_GENDER, petGender);
             values.put(FeedEntry.COLUMN_PET_WEIGHT, petWeight);
-            long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
-        if (newRowId != -1) {
-            Toast.makeText(this, "Data saved under ID: " + newRowId, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Ups! ERROR, we didn't manage to save data", Toast.LENGTH_SHORT).show();
-        }
+
+            getContentResolver().insert(FeedEntry.CONTENT_URI, values);
     }
 
     public void finish() {
