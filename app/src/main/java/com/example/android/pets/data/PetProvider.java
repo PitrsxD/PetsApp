@@ -1,6 +1,7 @@
 package com.example.android.pets.data;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -9,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.widget.Toast;
 
+import com.example.android.pets.R;
 import com.example.android.pets.data.PetsContract.FeedEntry;
 
 /**
@@ -85,6 +87,9 @@ public class PetProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot query unknown URI " + uri);
 
         }
+
+        cursor.setNotificationUri(getContext().getContentResolver(),uri);
+
         return  cursor;
     }
 
@@ -100,6 +105,7 @@ public class PetProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Insertion is not supported for " + uri);
         }
+
     }
 
     /**
@@ -123,10 +129,12 @@ public class PetProvider extends ContentProvider {
 
         long newRowId = db.insert(FeedEntry.TABLE_NAME, null, values);
         if (newRowId != -1) {
-            Toast.makeText(getContext(), "Pet saved under ID: " + newRowId, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.pet_saved, Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getContext(), "Ups! ERROR, we didn't manage to save data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), R.string.pet_not_save, Toast.LENGTH_SHORT).show();
         }
+
+        getContext().getContentResolver().notifyChange(uri,null);
         // Once we know the ID of the new row in the table,
         // return the new URI with the ID appended to the end of it
         return ContentUris.withAppendedId(uri, newRowId);
@@ -183,6 +191,7 @@ public class PetProvider extends ContentProvider {
         }
 
         int affRows = db.update(FeedEntry.TABLE_NAME, values, selection, selectionArgs);
+        getContext().getContentResolver().notifyChange(uri,null);
         return affRows;
     }
 
@@ -201,6 +210,7 @@ public class PetProvider extends ContentProvider {
                 // arguments will be a String array containing the actual ID.
                 selection = FeedEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                getContext().getContentResolver().notifyChange(uri,null);
                 return delete(uri, selection, selectionArgs);
             default:
                 throw new IllegalArgumentException("Delete is not supported for " + uri);

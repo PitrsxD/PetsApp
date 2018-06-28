@@ -15,16 +15,20 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.android.pets.data.PetCursorAdapter;
@@ -34,9 +38,15 @@ import com.example.android.pets.data.PetsDatabaseHelper;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
-    PetsDatabaseHelper mDbHelper;
+    private PetsDatabaseHelper mDbHelper;
+
+    private PetCursorAdapter petCursorAdapter;
+
+    private static final String[] projection = new String[] {FeedEntry._ID,FeedEntry.COLUMN_PET_NAME,FeedEntry.COLUMN_PET_BREED};
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,36 +67,31 @@ public class CatalogActivity extends AppCompatActivity {
         // and pass the context, which is the current activity.
         mDbHelper = new PetsDatabaseHelper(this, PetsDatabaseHelper.DB_NAME, null, PetsDatabaseHelper.DB_VERSION);
 
-        displayDatabaseInfo();
-    }
-
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
-
-        // Define a projection that specifies which columns from the database
-        // you will actually use after this query.
-        String[] projection = {
-                FeedEntry._ID,
-                FeedEntry.COLUMN_PET_NAME,
-                FeedEntry.COLUMN_PET_BREED,
-                FeedEntry.COLUMN_PET_GENDER,
-                FeedEntry.COLUMN_PET_WEIGHT
-        };
-
         //Content Resolver is going into PetProvider class, where will gather data through Query method
         Cursor cursor = getContentResolver().query(FeedEntry.CONTENT_URI, projection, null, null, null);
 
         // Display the number of rows in the Cursor (which reflects the number of rows in the
         // pets table in the database).
-        ListView displayView = findViewById(R.id.list_view_pet);
+        ListView displayListView = findViewById(R.id.list_view_pet);
 
-        PetCursorAdapter petAdapter = new PetCursorAdapter(this, cursor);
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        displayListView.setEmptyView(emptyView);
 
-        displayView.setAdapter(petAdapter);
+        petCursorAdapter = new PetCursorAdapter(this, cursor);
 
+        displayListView.setAdapter(petCursorAdapter);
+
+        displayListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+                Intent intent = new Intent(CatalogActivity.this, EditorActivity.class);
+                intent.setData(ContentUris.withAppendedId(FeedEntry.CONTENT_URI, id));
+                startActivity(intent);
+            }
+        });
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
 
@@ -105,7 +110,6 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 insertDummyData();
-                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -121,7 +125,7 @@ public class CatalogActivity extends AppCompatActivity {
         int genderDummy = 1;
         int weightDummy = 7;
 
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        mDbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(FeedEntry.COLUMN_PET_NAME, nameDummy);
@@ -130,5 +134,21 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(FeedEntry.COLUMN_PET_WEIGHT, weightDummy);
 
         getContentResolver().insert(FeedEntry.CONTENT_URI, values);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(this, FeedEntry.CONTENT_URI,projection,null,null,null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        petCursorAdapter.swapCursor(data);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        petCursorAdapter.swapCursor(null);
     }
 }
