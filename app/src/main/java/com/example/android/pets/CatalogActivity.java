@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.android.pets.data.PetCursorAdapter;
 import com.example.android.pets.data.PetsContract.FeedEntry;
@@ -113,7 +114,10 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                int rowsDeleted = getContentResolver().delete(FeedEntry.CONTENT_URI,null,null);
+                if (rowsDeleted > 0) {
+                    Toast.makeText(this, "All data were deleted.", Toast.LENGTH_SHORT);
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);

@@ -201,17 +201,21 @@ public class PetProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         final int match = sUriMatcher.match(uri);
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
         switch (match) {
             case PETS:
-                return delete(uri, selection, selectionArgs);
+                int affrowsDel = db.delete(FeedEntry.TABLE_NAME, selection, selectionArgs);
+                getContext().getContentResolver().notifyChange(uri,null);
+                return affrowsDel;
             case PETS_ID:
                 // For the PET_ID code, extract out the ID from the URI,
                 // so we know which row to update. Selection will be "_id=?" and selection
                 // arguments will be a String array containing the actual ID.
                 selection = FeedEntry._ID + "=?";
                 selectionArgs = new String[] { String.valueOf(ContentUris.parseId(uri)) };
+                int affrowsDelPet = db.delete(FeedEntry.TABLE_NAME, selection, selectionArgs);
                 getContext().getContentResolver().notifyChange(uri,null);
-                return delete(uri, selection, selectionArgs);
+                return affrowsDelPet;
             default:
                 throw new IllegalArgumentException("Delete is not supported for " + uri);
         }
